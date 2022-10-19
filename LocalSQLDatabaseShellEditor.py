@@ -40,7 +40,7 @@ while True:
             if tabSel == 1:
                 print("\nFor the table name please note that any whitespace will be removed i.e spaces, and it will be converted to standard naming unless it has already been specified i.e tbl")
                 nameOfTable=str(input("Please enter the name you want this table to be called?: "))
-                if nameOfTable[1:3] != "tbl":
+                if nameOfTable[0:3] != "tbl":
                     nameOfTable = "tbl" + nameOfTable
                 createTable = f"CREATE TABLE \"{nameOfTable}\" ( "
                 numOfFields=int(input("Please enter the number of fields you want the table to have?: "))
@@ -65,14 +65,14 @@ while True:
                     if isPrimary != "Yes":
                         isUniqueValid = False
                         while not isUniqueValid:
-                            isUnique = bool(input("Is this field unique? (Not permitting duplicates): "))
+                            isUnique = str(input("Is this field unique? (Not permitting duplicates): ")).title()
                             if isUnique == "Yes" or isUnique == "No":
                                 isUniqueValid = True
                             else:
                                 print("Invalid. Please enter Yes or No")
                     isNotNullValid = False
                     while not isNotNullValid:
-                        isNotNull = bool(input("Should this field allow null (Empty) values: "))
+                        isNotNull = str(input("Should this field allow null (Empty) values: ")).title()
                         if isNotNull == "Yes" or isNotNull == "No":
                             isNotNullValid = True
                         else:
@@ -81,12 +81,14 @@ while True:
                     createTable += f"\"{nameOfField}\" {dataType}"
                     if isPrimary == "Yes":
                         createTable += " " + "PRIMARY KEY"
-                    if isPrimary == "No" and isUnique == True:
+                    if isPrimary == "No" and isUnique == "Yes":
                         createTable += " " + "UNIQUE"
-                    if isNotNull == True:
+                    if isNotNull == "Yes":
                         createTable += " " + "NOT NULL"
                     if i+1 != numOfFields:
                         createTable += ", "
+                    #Add Foreign Key at the end before the closing bracket
+
                     elif i+1 == numOfFields:
                         createTable += " " + ");"
 
