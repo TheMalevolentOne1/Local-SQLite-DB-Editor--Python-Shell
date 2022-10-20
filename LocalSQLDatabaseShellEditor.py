@@ -1,3 +1,4 @@
+from queue import Empty
 import re
 import os
 
@@ -40,7 +41,13 @@ while True:
             tabSel = int(input("Please select the table option you want: \n1) Create Table\n2) Drop Table\n3) Insert into table \n4) Alter a table \n5) View Existing Tables\n\nWhat do you want to do: "))
             if tabSel == 1:
                 print("\nFor the table name please note that any whitespace will be removed i.e spaces, and it will be converted to standard naming unless it has already been specified i.e tbl")
-                nameOfTable=str(input("Please enter the name you want this table to be called?: "))
+                nameOfTableValid = False
+                while not nameOfTableValid:
+                    nameOfTable=str(input("Please enter the name you want this table to be called?: "))
+                    if nameOfTable == "":
+                        print("A table name has not been entered")
+                    else:
+                        nameOfTableValid = True
                 if nameOfTable[0:3] != "tbl":
                     nameOfTable = "tbl" + nameOfTable
                 createTable = f"CREATE TABLE \"{nameOfTable}\" ( "
@@ -48,6 +55,7 @@ while True:
                 while not numOfFieldsValid:
                     try:
                         numOfFields=int(input("Please enter the number of fields you want the table to have?: "))
+                        break
                     except ValueError:
                         print("The number of fields can only be a number")
                 for i in range(numOfFields):
@@ -99,16 +107,17 @@ while True:
                     elif i+1 == numOfFields:
                         createTable += " " + ");"
                 try:
-                    result = cur.execute(createTable).fetchall()
-                except sqlite3.OperationalError:
-                    print("Table fields can not have the same name!") 
-            if tabSel == 5:
+                    result = cur.execute(createTable)
+                except sqlite3.OperationalError as err:
+                    if re.search("already exists", str(err)):
+                        print(f"A table with the name {nameOfTable} already exists :(")
+            elif tabSel == 5:
                 tables = cur.execute("SELECT * FROM sqlite_master WHERE type = \"table\"").fetchall()
                 if len(tables) == 0:
                     print("This database has no tables!")
                 else:
                     print(tables)
-            else: 
+            else:
                 print("Invalid Option")
     else:
         print("Invalid Option")
