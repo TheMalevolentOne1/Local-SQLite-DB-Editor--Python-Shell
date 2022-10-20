@@ -7,6 +7,7 @@ import os
 print("Welcome to the SQLite Local Database editor! \nYou should know who this was made by obvs :P")
 
 userRequest = "" #assigning userRequest here to avoid later if statement checks in case of no database files.
+isNotNull = ""
 
 filePath = os.listdir()
 for i in range(len(filePath)):
@@ -28,7 +29,7 @@ elif userRequest != "Yes":
 
 import sqlite3
 
-con = sqlite3.connect("test.db")
+con = sqlite3.connect(database)
 cur = con.cursor()
 
 while True:
@@ -43,13 +44,18 @@ while True:
                 if nameOfTable[0:3] != "tbl":
                     nameOfTable = "tbl" + nameOfTable
                 createTable = f"CREATE TABLE \"{nameOfTable}\" ( "
-                numOfFields=int(input("Please enter the number of fields you want the table to have?: "))
+                numOfFieldsValid = False
+                while not numOfFieldsValid:
+                    try:
+                        numOfFields=int(input("Please enter the number of fields you want the table to have?: "))
+                    except ValueError:
+                        print("The number of fields can only be a number")
                 for i in range(numOfFields):
                     nameOfField = str(input("\nPlease enter the name you want to call the field: "))
                     dataTypeValid = False
                     while not dataTypeValid:
                         print("Currently Permitted Datatypes:\nTEXT\nINT\nDATE")
-                        dataType = str(input("Please enter the datatype that this field should be: ")).upper()
+                        dataType = input("Please enter the datatype that this field should be: ").upper()
                         if dataType == "TEXT" or dataType == "INT" or dataType == "DATE":
                             dataTypeValid = True
                         else:
@@ -57,7 +63,7 @@ while True:
                     print("The next few questions require Yes or No answers")
                     isPrimaryValid = False
                     while not isPrimaryValid:
-                        isPrimary = str(input("Is this field a primary key?: ")).title()
+                        isPrimary = input("Is this field a primary key?: ").title()
                         if isPrimary == "Yes" or isPrimary == "No":
                             isPrimaryValid = True
                         else:
@@ -65,18 +71,19 @@ while True:
                     if isPrimary != "Yes":
                         isUniqueValid = False
                         while not isUniqueValid:
-                            isUnique = str(input("Is this field unique? (Not permitting duplicates): ")).title()
+                            isUnique = input("Is this field unique? (Not permitting duplicates): ").title()
                             if isUnique == "Yes" or isUnique == "No":
                                 isUniqueValid = True
                             else:
                                 print("Invalid. Please enter Yes or No")
-                    isNotNullValid = False
-                    while not isNotNullValid:
-                        isNotNull = str(input("Should this field allow null (Empty) values: ")).title()
-                        if isNotNull == "Yes" or isNotNull == "No":
-                            isNotNullValid = True
-                        else:
-                            print("Invalid. Please enter Yes or No")
+                    if isPrimary != "Yes":
+                        isNotNullValid = False
+                        while not isNotNullValid:
+                            isNotNull = input("Should this field allow null (Empty) values: ").title()
+                            if isNotNull == "Yes" or isNotNull == "No":
+                                isNotNullValid = True
+                            else:
+                                print("Invalid. Please enter Yes or No")
                     #Include Foreign Key Here as function call. Add later.
                     createTable += f"\"{nameOfField}\" {dataType}"
                     if isPrimary == "Yes":
@@ -91,8 +98,16 @@ while True:
 
                     elif i+1 == numOfFields:
                         createTable += " " + ");"
-
-                print(createTable)
+                try:
+                    result = cur.execute(createTable).fetchall()
+                except sqlite3.OperationalError:
+                    print("Table fields can not have the same name!") 
+            if tabSel == 5:
+                tables = cur.execute("SELECT * FROM sqlite_master WHERE type = \"table\"").fetchall()
+                if len(tables) == 0:
+                    print("This database has no tables!")
+                else:
+                    print(tables)
             else: 
                 print("Invalid Option")
     else:
