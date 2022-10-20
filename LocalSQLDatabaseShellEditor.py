@@ -1,4 +1,3 @@
-from queue import Empty
 import re
 import os
 
