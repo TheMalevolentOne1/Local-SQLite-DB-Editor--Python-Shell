@@ -53,16 +53,16 @@ while True:
                 numOfFieldsValid = False
                 while not numOfFieldsValid:
                     try:
-                        numOfFields=int(input("Please enter the number of fields you want the table to have?: "))
+                        numOfFields=int(input("Please enter the number of columns you want the table to have?: "))
                         break
                     except ValueError:
-                        print("The number of fields can only be a number")
+                        print("The number of columns can only be a number")
                 for i in range(numOfFields):
-                    nameOfField = str(input("\nPlease enter the name you want to call the field: "))
+                    nameOfField = str(input("\nPlease enter the name you want to call the column: "))
                     dataTypeValid = False
                     while not dataTypeValid:
                         print("Currently Permitted Datatypes:\nTEXT\nINT\nDATE")
-                        dataType = input("Please enter the datatype that this field should be: ").upper()
+                        dataType = input("Please enter the datatype that this column should be: ").upper()
                         if dataType == "TEXT" or dataType == "INT" or dataType == "DATE":
                             dataTypeValid = True
                         else:
@@ -70,7 +70,7 @@ while True:
                     print("The next few questions require Yes or No answers")
                     isPrimaryValid = False
                     while not isPrimaryValid:
-                        isPrimary = input("Is this field a primary key?: ").title()
+                        isPrimary = input("Is this column a primary key?: ").title()
                         if isPrimary == "Yes" or isPrimary == "No":
                             isPrimaryValid = True
                         else:
@@ -78,7 +78,7 @@ while True:
                     if isPrimary != "Yes":
                         isUniqueValid = False
                         while not isUniqueValid:
-                            isUnique = input("Is this field unique? (Not permitting duplicates): ").title()
+                            isUnique = input("Is this column unique? (Not permitting duplicates): ").title()
                             if isUnique == "Yes" or isUnique == "No":
                                 isUniqueValid = True
                             else:
@@ -86,7 +86,7 @@ while True:
                     if isPrimary != "Yes":
                         isNotNullValid = False
                         while not isNotNullValid:
-                            isNotNull = input("Should this field allow null (Empty) values: ").title()
+                            isNotNull = input("Should this column allow null (Empty) values: ").title()
                             if isNotNull == "Yes" or isNotNull == "No":
                                 isNotNullValid = True
                             else:
@@ -110,6 +110,10 @@ while True:
                 except sqlite3.OperationalError as err:
                     if re.search("already exists", str(err)):
                         print(f"A table with the name {nameOfTable} already exists :(")
+                    elif re.search("duplicate column name", str(err)):
+                        print("Tables can not have duplicate column names!")
+                    else:
+                        raise
             elif tabSel == 5:
                 tables = cur.execute("SELECT * FROM sqlite_master WHERE type = \"table\"").fetchall()
                 if len(tables) == 0:
