@@ -92,9 +92,10 @@ while True:
                             else:
                                 print("Invalid. Please enter Yes or No")
                     #Include Foreign Key Here as function call. Add later.
+                    primaryKeys=[]
                     createTable += f"\"{nameOfField}\" {dataType}"
                     if isPrimary == "Yes":
-                        createTable += " " + "PRIMARY KEY"
+                        primaryKeys.append(nameOfField)
                     if isPrimary == "No" and isUnique == "Yes":
                         createTable += " " + "UNIQUE"
                     if isNotNull == "Yes":
@@ -104,7 +105,13 @@ while True:
                     #Add Foreign Key at the end before the closing bracket
 
                     elif i+1 == numOfFields:
+                        for i in range(len(primaryKeys)):
+                            createTable += " PRIMARY KEY ( " + primaryKeys[i]
+                        createTable += " )"
                         createTable += " " + ");"
+                print(createTable)
+
+                '''
                 try:
                     result = cur.execute(createTable)
                 except sqlite3.OperationalError as err:
@@ -114,12 +121,14 @@ while True:
                         print("Tables can not have duplicate column names!")
                     else:
                         raise
+                print(primaryKeys)
+
+            '''
             elif tabSel == 5:
-                tables = cur.execute("SELECT * FROM sqlite_master WHERE type = \"table\"").fetchall()
-                if len(tables) == 0:
-                    print("This database has no tables!")
-                else:
-                    print(tables)
+                tableList = []
+                for i in cur.execute("SELECT * FROM sqlite_master WHERE type = \"table\""):
+                    tableList.append(i)
+                print(tableList)
             else:
                 print("Invalid Option")
     else:
