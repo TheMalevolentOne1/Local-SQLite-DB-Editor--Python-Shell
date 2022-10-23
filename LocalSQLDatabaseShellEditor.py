@@ -41,6 +41,7 @@ while True:
             if tabSel == 1:
                 print("\nFor the table name please note that any whitespace will be removed i.e spaces, and it will be converted to standard naming unless it has already been specified i.e tbl")
                 nameOfTableValid = False
+                primaryKeys=[]
                 while not nameOfTableValid:
                     nameOfTable=str(input("Please enter the name you want this table to be called?: "))
                     if nameOfTable == "":
@@ -63,7 +64,7 @@ while True:
                     while not dataTypeValid:
                         print("Currently Permitted Datatypes:\nTEXT\nINT\nDATE")
                         dataType = input("Please enter the datatype that this column should be: ").upper()
-                        if dataType == "TEXT" or dataType == "INT" or dataType == "DATE":
+                        if dataType in ['TEXT','INT','DATE']:
                             dataTypeValid = True
                         else:
                             print("Invalid Datatype") 
@@ -71,7 +72,7 @@ while True:
                     isPrimaryValid = False
                     while not isPrimaryValid:
                         isPrimary = input("Is this column a primary key?: ").title()
-                        if isPrimary == "Yes" or isPrimary == "No":
+                        if isPrimary in ['Yes','No']:
                             isPrimaryValid = True
                         else:
                             print("Invalid. Please enter Yes or No")
@@ -79,7 +80,7 @@ while True:
                         isUniqueValid = False
                         while not isUniqueValid:
                             isUnique = input("Is this column unique? (Not permitting duplicates): ").title()
-                            if isUnique == "Yes" or isUnique == "No":
+                            if isUnique in ['Yes','No']:
                                 isUniqueValid = True
                             else:
                                 print("Invalid. Please enter Yes or No")
@@ -87,12 +88,11 @@ while True:
                         isNotNullValid = False
                         while not isNotNullValid:
                             isNotNull = input("Should this column allow null (Empty) values: ").title()
-                            if isNotNull == "Yes" or isNotNull == "No":
+                            if isNotNull in ['Yes','No']: 
                                 isNotNullValid = True
                             else:
                                 print("Invalid. Please enter Yes or No")
                     #Include Foreign Key Here as function call. Add later.
-                    primaryKeys=[]
                     createTable += f"\"{nameOfField}\" {dataType}"
                     if isPrimary == "Yes":
                         primaryKeys.append(nameOfField)
@@ -100,18 +100,22 @@ while True:
                         createTable += " " + "UNIQUE"
                     if isNotNull == "Yes":
                         createTable += " " + "NOT NULL"
-                    if i+1 != numOfFields:
-                        createTable += ", "
+                    
+                    createTable += ", "
+                    print(primaryKeys)
                     #Add Foreign Key at the end before the closing bracket
 
-                    elif i+1 == numOfFields:
+                    if i+1 == numOfFields:
+                        
+                        createTable += " PRIMARY KEY ( "
                         for i in range(len(primaryKeys)):
-                            createTable += " PRIMARY KEY ( " + primaryKeys[i]
+                            createTable += f"\"{primaryKeys[i]}\""
+                            if i+1 != len(primaryKeys):
+                                createTable += ", "
                         createTable += " )"
                         createTable += " " + ");"
-                print(createTable)
+                primaryKeys = []
 
-                '''
                 try:
                     result = cur.execute(createTable)
                 except sqlite3.OperationalError as err:
@@ -121,9 +125,8 @@ while True:
                         print("Tables can not have duplicate column names!")
                     else:
                         raise
-                print(primaryKeys)
 
-            '''
+
             elif tabSel == 5:
                 tableList = []
                 for i in cur.execute("SELECT * FROM sqlite_master WHERE type = \"table\""):
