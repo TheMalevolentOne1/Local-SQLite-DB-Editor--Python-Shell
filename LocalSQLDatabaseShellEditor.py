@@ -1,5 +1,6 @@
 import re
 import os
+from signal import raise_signal
 from stringprep import in_table_a1
 
 export = False
@@ -105,6 +106,7 @@ while True:
                                 isNotNullValid = True
                             else:
                                 print("Invalid. Please enter Yes or No")
+
                     #Include Foreign Key Here as function call. Add later.
                     createTable += f"\"{nameOfField}\" {dataType}"
                     if isPrimary == "Yes":
@@ -138,7 +140,14 @@ while True:
                     else:
                         raise
             elif tabSel == 2:
-                print("")
+                dropTable = str(input("Please enter the table name you wish to drop: "))
+                try:
+                    cur.execute(f"DROP TABLE \"{dropTable}\"")
+                except sqlite3.OperationalError as err:
+                    if re.match("no such table",str(err)):
+                        print(f"A table with the name {dropTable} does not exist.")
+                    else:
+                        raise
             elif tabSel == 3:
                 print("")
             elif tabSel == 4:
