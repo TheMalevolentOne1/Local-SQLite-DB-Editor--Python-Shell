@@ -1,4 +1,3 @@
-from logging import error
 import re
 import os
 
@@ -89,6 +88,9 @@ while True:
                             isPrimaryValid = True
                         else:
                             print("Invalid. Please enter Yes or No")
+                    isForeignValid = False
+                    while not isForeignValid:
+                        print #333333333333333333333333333333333333333333333333333333333333333333333333 
                     if isPrimary != "Yes":
                         isUniqueValid = False
                         while not isUniqueValid:
@@ -186,7 +188,7 @@ while True:
 
     elif sel == 3:
         try:
-            setSel = int(input(f"1) Export: {export} \n\nWhat would you like to do?: ")) #Add additional options at a later date.
+            setSel = int(input(f"1) Export: {export} \n\nWhat would you like to do?: ")) #Add additional options at a     
             if setSel == 1:
                 status = ""
                 if export == True:
