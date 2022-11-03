@@ -1,13 +1,12 @@
+from logging import error
 import re
 import os
-from signal import raise_signal
-from stringprep import in_table_a1
 
 export = False
 warning = ""
+file = ""
 
-
-print("Welcome to the SQLite Local Database editor! \nYou should know who this was made by obvs :P")
+print("\n\nWelcome to the SQLite Local Database editor!\nYou should know who this was made by obvs :P \nIf you would like the SQL to be exported please go to the export settings.")
 
 userRequest = "" #assigning userRequest here to avoid later if statement checks in case of no database files.
 isNotNull = ""
@@ -38,8 +37,6 @@ import sqlite3
 con = sqlite3.connect(database)
 cur = con.cursor()
 
-print("Notice: if you would like the SQL to be exported to a file for documentation purposes please enable it inside of the ")
-
 while True:
     try:
         sel = int(input("\nSQLite Database Editor Menu:\n\nPlease select one of the following options:\n1) Table Options\n2) Query Options\n3) Export Settings\n4) Quit\n\nWhat do you want to do: "))
@@ -48,10 +45,12 @@ while True:
     if sel == 1:
         tabMenu = False
         while not tabMenu:
+            tabSel = 0
             try:
-                tabSel = int(input("Please select the table option you want: \n1) Create Table\n2) Drop Table\n3) Insert into table \n4) Alter a table \n5) View Existing Tables\n\nWhat do you want to do: "))
+                tabSel = int(input("\nPlease select the table option you want: \n1) Create Table\n2) Drop Table\n3) Insert into table \n4) Alter a table \n5) View Existing Tables\n6) Back\n\nWhat do you want to do: "))
             except ValueError:
                 print("Can only be a number :)")
+
             if tabSel == 1:
                 print("\nFor the table name please note that any whitespace will be removed i.e spaces, and it will be converted to standard naming unless it has already been specified i.e tbl")
                 nameOfTableValid = False
@@ -68,7 +67,7 @@ while True:
                 numOfFieldsValid = False
                 while not numOfFieldsValid:
                     try:
-                        numOfFields=int(input("Please enter the number of columns you want the table to have?: "))
+                        numOfFields=int(input("\nPlease enter the number of columns you want the table to have?: "))
                         break
                     except ValueError:
                         print("The number of columns can only be a number")
@@ -77,7 +76,7 @@ while True:
                     dataTypeValid = False
                     while not dataTypeValid:
                         print("Currently Permitted Datatypes:\nTEXT\nINT\nDATE")
-                        dataType = input("Please enter the datatype that this column should be: ").upper()
+                        dataType = input("\nPlease enter the datatype that this column should be: ").upper()
                         if dataType in ['TEXT','INT','DATE']:
                             dataTypeValid = True
                         else:
@@ -131,18 +130,28 @@ while True:
 
                 try:
                     result = cur.execute(createTable)
-                    print("Table Successfully Created!")
+                    print("\nTable Successfully Created!")
+                    if export == True:
+                        with open(file, "a") as f:
+                            f.write(createTable)
+                            f.close()
                 except sqlite3.OperationalError as err:
                     if re.search("already exists", str(err)):
-                        print(f"A table with the name {nameOfTable} already exists :(")
+                        print(f"A table with the name {nameOfTable} already exists")
                     elif re.search("duplicate column name", str(err)):
                         print("Tables can not have duplicate column names!")
                     else:
                         raise
+
             elif tabSel == 2:
                 dropTable = str(input("Please enter the table name you wish to drop: "))
                 try:
                     cur.execute(f"DROP TABLE \"{dropTable}\"")
+                    print("\nTable successfully Deleted!")
+                    if export == True:
+                        with open(file, "a") as f:
+                            f.write(f"\nDROP TABLE \"{dropTable}\"")
+                            f.close()
                 except sqlite3.OperationalError as err:
                     if re.match("no such table",str(err)):
                         print(f"A table with the name {dropTable} does not exist.")
@@ -158,36 +167,80 @@ while True:
                 for i in cur.execute("SELECT * FROM sqlite_master WHERE type = \"table\""):
                     tableSQL.append(i[4])
 
-                x = 0
-                for i in tableSQL:
-                    arr = i.split(" ")
-                    print(arr)
-                    #Getting Table Names
-                    tableData.append(arr[arr.index("TABLE")+1])
-                    #Getting Field Names
-                    for c in range(len(arr)):
-                        if arr[c] in ['TEXT','INT','DATE']:
-                            tableData .append(arr[c-1])
-                    x+=1
-                
-                for i in tableData:
-                    print(i)
+                if tableSQL == []:
+                    print("\nThis Database has no tables!")
+                else:
+                    for i in tableSQL:
+                        arr = i.split(" ")
+                        #Getting Table Names
+                        tableData.append(arr[arr.index("TABLE")+1])
+
+                    print("Existing Tables:")
+                    for i in tableData:
+                        print(f"Table Name: {i}")
+                    
+            elif tabSel == 6:
+                tabMenu = True
             else:
                 print("Invalid Option")
+
     elif sel == 3:
         try:
-            setSel = int(input(f"1) Export: {export} 2) Set Export file\n\nWhat would you like to do?: "))
+            setSel = int(input(f"1) Export: {export} \n\nWhat would you like to do?: ")) #Add additional options at a later date.
             if setSel == 1:
                 status = ""
                 if export == True:
                     status = "disable"
                 else:
                     status = "enable"
-                while warning not in [True,False]:
-                    warning = bool(input("Warning: Are you sure you want to active exports: ")).title()
-                    if warning not in [True,False]:
-                        print("Only acceptable values are true and false!")
-                exports = warning
+                while True:
+                    warning = str(input(f"Warning: Are you sure you want to try to {status} exports: ")).title()
+                    if warning not in ["Yes","No"]:
+                        print("Only acceptable values are Yes and false!")
+                    else:
+                        break
+
+                if warning == "Yes" and export == False:
+                    while True:
+                        fileChoice = str(input("\nDo you want to create a new file or would you like to use existing? \nPlease type Existing or New: ")).title()
+                        if fileChoice in ['Existing','New']:
+                            break
+                        else:
+                            print("Only Existing or New are valid.")
+                    if fileChoice == "New":
+                        fileName = str(input("\nWhat do you want to call the file: "))
+                        try:
+                            open(fileName+".txt", "x")
+                            file = open(fileName+".txt", "w")
+                            print(f"\n{fileName} was chosen as the text file to export to.")
+                            export = True
+                        except FileExistsError as err:
+                            print("This file already tests")
+                    elif fileChoice == "Existing":
+                        filePath = os.listdir()
+                        for i in filePath:
+                            if re.search(".txt",str(i)):
+                                txtCheck = ""
+                                while True:
+                                    txtCheck = str(input(f"is {i} the text file that you want to export to: ")).title()
+                                    if txtCheck in ['Yes','No']:
+                                        break
+                                    else:
+                                        print("Only yes or no are acceptable values")
+                            try:
+                                if txtCheck == "Yes":
+                                    file = i
+                                    export = True
+                                    print(f"\n{i} was chosen as the text file to export to.")
+                                    break
+                            except NameError:
+                                if filePath.index(i) + 1 == len(filePath):
+                                    txtCheck = None
+                                    print("No text file was found")
+                elif warning == "Yes" and export == True:
+                    file = ""
+                    export = False
+                    print("Exporting has been disabled.")
         except ValueError:
             print("Must be a number!")
     else:
