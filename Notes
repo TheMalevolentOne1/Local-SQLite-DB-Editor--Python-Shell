@@ -1,0 +1,1 @@
+Add a way to create a database if no database is found and then connect that database to the main editor (database variable)
