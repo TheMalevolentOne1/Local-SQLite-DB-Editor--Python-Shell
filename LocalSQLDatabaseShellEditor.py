@@ -5,31 +5,56 @@ export = False
 warning = ""
 file = ""
 
-print("\n\nWelcome to the SQLite Local Database editor!\nYou should know who this was made by obvs :P \nIf you would like the SQL to be exported please go to the export settings.")
+print("\n\nWelcome to the SQLite editor!\nYou should know who this was made by :P \nIf you would like the SQL to be exported please go to the export settings.")
 
-userRequest = "" #assigning userRequest here to avoid later if statement checks in case of no database files.
+userRequest = ""
 isNotNull = ""
+database = ""
 
-filePath = os.listdir()
-for i in range(len(filePath)):
-    if re.search(".db", filePath[i]):
-        print("A Database File has been found.")
-        userRequestValid = False
-        while userRequestValid == False:
-            userRequest = str(input(f"\nYes or No is the file {filePath[i]} the correct database?: ")).title()
-            if userRequest == "Yes":
-                database = filePath[i]
-                break
-            elif userRequest not in ['Yes','No']:
-                print("Invalid Answer.")
-        
+while True:
+    newOrEx = str(input("Would you like to make a New or use an Existing database: ")).title()
+    if newOrEx not in ['New','Existing']:
+        print("New or Existing are the only acceptable values")
+    else:
+        if newOrEx == "Existing":
+            filePath = os.listdir()
+            if len(filePath) == 0:
+                print("No databases could be found!")
+                quit()
+            else:
+                for i in range(len(filePath)):
+                    if re.search(".db", filePath[i]):
+                        print("A Database File has been found.")
+                        while True:
+                            userRequest = str(input(f"\nYes or No is the file {filePath[i]} the correct database?: ")).title()
+                            if userRequest == "Yes":
+                                database = filePath[i]
+                                break
+                            elif userRequest not in ['Yes','No']:
+                                print("Invalid Answer.")
+                            else:
+                                break
+                        if userRequest == "Yes":
+                            break
+                if database != "":
+                    break
+        elif newOrEx == "New":
+            while True:
+                nameDB = str(input("What do you want to call the new database?: "))
+                try:
+                    open(nameDB+".db","x")
+                    database = f"{nameDB}.db"
+                    break
+                except:
+                    raise
+            break
+        else:
+            print("Invalid Option")
+            
 if userRequest == "No":
     print("The database that you want has not been discovered. Please ensure that you have moved your database to the same file as this program and try again. \nThanks!")
     quit()
-
-elif userRequest != "Yes":
-    print("No database was found. Please ensure that you have moved your database to the same file as this program and try again.\nThanks!")
-    quit()
+    
 
 import sqlite3
 
@@ -52,19 +77,17 @@ while True:
 
             if tabSel == 1:
                 print("\nFor the table name please note that any whitespace will be removed i.e spaces, and it will be converted to standard naming unless it has already been specified i.e tbl")
-                nameOfTableValid = False
                 primaryKeys=[]
-                while not nameOfTableValid:
+                while True:
                     nameOfTable=str(input("Please enter the name you want this table to be called?: "))
                     if nameOfTable == "":
                         print("A table name has not been entered")
                     else:
-                        nameOfTableValid = True
+                        break
                 if nameOfTable[0:3] != "tbl":
                     nameOfTable = "tbl" + nameOfTable
                 createTable = f"CREATE TABLE \"{nameOfTable}\" ( "
-                numOfFieldsValid = False
-                while not numOfFieldsValid:
+                while True:
                     try:
                         numOfFields=int(input("\nPlease enter the number of columns you want the table to have?: "))
                         break
@@ -72,39 +95,35 @@ while True:
                         print("The number of columns can only be a number")
                 for i in range(numOfFields):
                     nameOfField = str(input("\nPlease enter the name you want to call the column: "))
-                    dataTypeValid = False
-                    while not dataTypeValid:
+                    while True:
                         print("Currently Permitted Datatypes:\nTEXT\nINT\nDATE")
                         dataType = input("\nPlease enter the datatype that this column should be: ").upper()
                         if dataType in ['TEXT','INT','DATE']:
-                            dataTypeValid = True
+                            break
                         else:
                             print("Invalid Datatype") 
                     print("The next few questions require Yes or No answers")
-                    isPrimaryValid = False
-                    while not isPrimaryValid:
+                    while True:
                         isPrimary = input("Is this column a primary key?: ").title()
                         if isPrimary in ['Yes','No']:
-                            isPrimaryValid = True
+                            break
                         else:
                             print("Invalid. Please enter Yes or No")
-                    isForeignValid = False
-                    while not isForeignValid:
-                        print #333333333333333333333333333333333333333333333333333333333333333333333333 
+                    while True:
+                        #333333333333333333333333333333333333333333333333333333333333333333333333
+                        break
                     if isPrimary != "Yes":
-                        isUniqueValid = False
-                        while not isUniqueValid:
+                        while True:
                             isUnique = input("Is this column unique? (Not permitting duplicates): ").title()
                             if isUnique in ['Yes','No']:
-                                isUniqueValid = True
+                                break
                             else:
                                 print("Invalid. Please enter Yes or No")
                     if isPrimary != "Yes":
-                        isNotNullValid = False
-                        while not isNotNullValid:
+                        while True:
                             isNotNull = input("Should this column allow null (Empty) values: ").title()
                             if isNotNull in ['Yes','No']: 
-                                isNotNullValid = True
+                                break
                             else:
                                 print("Invalid. Please enter Yes or No")
 
@@ -176,7 +195,7 @@ while True:
                         arr = i.split(" ")
                         #Getting Table Names
                         tableData.append(arr[arr.index("TABLE")+1])
-
+                        print(arr[arr.index("TABLE")+1])
                     print("Existing Tables:")
                     for i in tableData:
                         print(f"Table Name: {i}")
@@ -245,5 +264,7 @@ while True:
                     print("Exporting has been disabled.")
         except ValueError:
             print("Must be a number!")
+    elif sel == 4:
+        quit()
     else:
         print("Invalid Option")
