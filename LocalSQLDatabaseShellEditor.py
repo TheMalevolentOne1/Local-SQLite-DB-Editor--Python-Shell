@@ -110,8 +110,21 @@ while True:
                         else:
                             print("Invalid. Please enter Yes or No")
                     while True:
-                        #333333333333333333333333333333333333333333333333333333333333333333333333
-                        break
+                        isForeign = input("Is this column a foreign key?: ").title()
+                        if isForeign == "Yes":
+                            tableReference = input("What table do you want this column to act as a foreign key for?: ")
+                            columnReference = input(f"What column in the {tableReference} do you want to act the foreign key for?: ")
+                            try:
+                                cur.execute(f"SELECT {columnReference} FROM {tableReference}")
+                            except sqlite3.OperationalError as err:
+                                if re.search("no such table", err):
+                                    print(f"The {tableReference} does not exist!")
+                                else:
+                                    raise
+                        elif isForeign == "No":
+                            break
+                        else:
+                            print("Invalid. Please enter Yes or No")
                     if isPrimary != "Yes":
                         while True:
                             isUnique = input("Is this column unique? (Not permitting duplicates): ").title()
