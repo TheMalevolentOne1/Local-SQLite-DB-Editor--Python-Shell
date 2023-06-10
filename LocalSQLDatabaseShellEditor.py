@@ -74,7 +74,6 @@ while True:
                 tabSel = int(input("\nPlease select the table option you want: \n1) Create Table\n2) Drop Table\n3) Insert into table \n4) Alter a table \n5) View Existing Tables\n6) Back\n\nWhat do you want to do: "))
             except ValueError:
                 print("Can only be a number :)")
-
             if tabSel == 1:
                 print("\nFor the table name please note that any whitespace will be removed i.e spaces, and it will be converted to standard naming unless it has already been specified i.e tbl")
                 primaryKeys=[]
